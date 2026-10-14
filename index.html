@@ -57,11 +57,14 @@ input{flex:1;font:inherit;font-size:18px;font-weight:700;padding:13px 14px;borde
 .cd{aspect-ratio:3/4;border-radius:12px;font-size:26px;font-weight:900;color:#2b2140;box-shadow:0 4px 0 rgba(0,0,0,.2);opacity:.5;transition:.15s}
 .cd.s{opacity:1;transform:translateY(-4px) scale(1.07);outline:4px solid var(--tx);box-shadow:0 8px 0 rgba(0,0,0,.25)}
 .mods{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px}
-.md{background:#2b2140;color:#ffe066;border-radius:12px;padding:12px 0;font-weight:900;font-size:17px;opacity:.5}
-.md.s{opacity:1;outline:4px solid var(--ac);transform:scale(1.07)}
+.md{background:#ca5645;color:#fff;border-radius:12px;padding:12px 0;font-weight:900;font-size:17px;opacity:.5}
+.md.s{opacity:1;outline:4px solid var(--tx);transform:scale(1.07)}
 .big{text-align:center;font-size:56px;font-weight:900;line-height:1;margin:10px 0}
 .f7{text-align:center;font-weight:900;color:#fff;background:linear-gradient(90deg,#ff4f8b,#ffa63d);border-radius:99px;padding:6px;margin:8px 0;animation:pulse 1s infinite}
 @keyframes pulse{50%{transform:scale(1.05)}}
+.atk{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ak{background:var(--card);border-radius:99px;padding:8px 12px;font-weight:800;font-size:14px}.ak.s{background:var(--ok);color:#fff}
+.lk{width:100%;background:rgba(32,180,134,.2);border-radius:14px;padding:12px;font-weight:800;margin-bottom:10px}.lk.s{background:var(--ok);color:#fff}
+.tg{position:relative;width:58px;height:34px;flex:none}.tg input{opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;z-index:2;cursor:pointer}.tg span{position:absolute;inset:0;background:rgba(128,128,150,.4);border-radius:99px;transition:.25s}.tg span:before{content:"";position:absolute;left:3px;top:3px;width:28px;height:28px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.3)}.tg input:checked+span{background:var(--dg)}.tg input:checked+span:before{transform:translateX(24px)}
 .bust{width:100%;background:rgba(255,93,93,.18);border-radius:14px;padding:12px;font-weight:800;margin-bottom:10px}.bust.s{background:var(--dg);color:#fff}
 .pod{display:flex;align-items:flex-end;justify-content:center;gap:6px;height:290px;margin:6px 0 18px}
 .pc{flex:1;max-width:130px;text-align:center}.pc .av{margin:0 auto 4px;width:54px;height:54px;font-size:30px}
@@ -88,9 +91,9 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:20}
 <div id="app"></div>
 <div class="by">Créé par Anthony</div>
 <div id="tabs"><button data-t="g">🎮<span>Parties</span></button><button data-t="s">📊<span>Classements</span></button></div>
-<div id="ov"></div><div id="sh"></div><div id="dlg"></div><div id="toast"></div><canvas id="cv"></canvas>
+<div id="ov"></div><div id="sh"></div><div id="dlg"></div><input type="file" id="fi" accept=".json,application/json" hidden><div id="toast"></div><canvas id="cv"></canvas>
 <script>
-const C=['#c9c2d9','#c2a98a','#f4d03f','#6ec6c1','#8bc34a','#f5a742','#ef7a7a','#4fc3f7','#ba68c8','#81c784','#ff8a65','#8c9eff','#f06292'];
+const C=['#f2f2f5','#d5c4ad','#e2d067','#c76357','#70bcc6','#6bac6f','#7ec9cb','#d99686','#b8d081','#e7a153','#cc4536','#7490cd','#968573','#b583c9'];
 const AV=['🦊','🐙','🦄','🐸','🐼','🦁','🐯','🐵','🐲','🦖','🐧','🦉'],MODS=[2,4,6,8,10];
 const SORTS=['Taux de victoire','Victoires','Score moyen','Flip 7'];
 let S={games:[],tab:'g',view:'tabs',cur:null,sort:0},SI=0,N={name:'',pl:[]};
@@ -102,7 +105,10 @@ const cg=()=>S.games.find(g=>g.id===S.cur);
 const tot=(p,n=99)=>p.hist.slice(0,n).reduce((a,h)=>a+h.s,0);
 const flips=p=>p.hist.filter(h=>h.f).length;
 const avatar=i=>`<div class="av" style="background:hsl(${i*47%360} 80% 80%)">${AV[i%AV.length]}</div>`;
-function calc(h){if(!h||h.b)return 0;let s=h.n.reduce((a,b)=>a+b,0);if(h.x)s*=2;s+=h.m.reduce((a,b)=>a+b,0);if(h.n.length>=7)s+=15;return s}
+const lk13=h=>h.l&&h.n.includes(13)?1:0,cnt=h=>h.n.length+lk13(h);
+function calc(h,v,br){if(!h)return 0;const m=h.m.reduce((a,b)=>a+b,0);if(h.b)return br?-m:0;const f=cnt(h)>=7,bn=f&&!(br&&h.a>=0)?15:0;let s=h.n.reduce((a,b)=>a+b,0)+13*lk13(h);
+ if(v){if(h.n.includes(0)&&!f)return 0;if(h.x)s=Math.floor(s/2);s-=m;return (br?s:Math.max(0,s))+bn}
+ if(h.x)s*=2;return s+m+bn}
 function ranks(g,n){const a=g.players.map((p,i)=>({t:tot(p,n),i})).sort((x,y)=>y.t-x.t||x.i-y.i),r={};a.forEach((o,k)=>r[o.i]=k);return r}
 function winners(g){const m=Math.max(...g.players.map(p=>tot(p)));return m>0?g.players.filter(p=>tot(p)===m).map(p=>p.name):[]}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('o');setTimeout(()=>e.classList.remove('o'),2800)}
@@ -121,9 +127,9 @@ document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.data
 /* PARTIES */
 function games(a){
  const gs=[...S.games].sort((x,y)=>y.date.localeCompare(x.date));
- a.innerHTML=`<div class="hd"><button class="plus" id="np">＋</button></div><h1>Mes parties</h1>`+(gs.length?gs.map(g=>`<div class="sw" data-id="${g.id}"><button class="rm">🗑</button><div class="card gm"><div class="ic">${g.done?'🏁':'🎮'}</div><div class="mid"><b>${esc(g.name)}</b><div class="mut">${fd(g.date)}</div><div class="mut">${g.players.length} joueurs • ${g.done?'🏆 '+esc(winners(g).join(' & ')):'Manche '+g.round}</div></div><span class="st ${g.done?'':'or'}">${g.done?'Terminée':'En cours'} ›</span></div></div>`).join(''):'<p class="empty">Aucune partie pour l’instant…<br>Touche ＋ pour commencer 🃏</p>');
+ a.innerHTML=`<div class="hd"><div class="row"><button class="ib" id="ex">📤</button><button class="ib" id="im">📥</button></div><button class="plus" id="np">＋</button></div><h1>Mes parties</h1>`+(gs.length?gs.map(g=>`<div class="sw" data-id="${g.id}"><button class="rm">🗑</button><div class="card gm"><div class="ic">${g.done?'🏁':'🎮'}</div><div class="mid"><b>${esc(g.name)}</b><div class="mut">${fd(g.date)}</div><div class="mut">${g.players.length} joueurs ${g.br?'• 💀 ':g.v?'• 😈 ':''}• ${g.done?'🏆 '+esc(winners(g).join(' & ')):'Manche '+g.round}</div></div><span class="st ${g.done?'':'or'}">${g.done?'Terminée':'En cours'} ›</span></div></div>`).join(''):'<p class="empty">Aucune partie pour l’instant…<br>Touche ＋ pour commencer 🃏</p>');
  on('#np',()=>{N={name:'',pl:[]};go('new')});
- swipe();
+ swipe();on('#ex',exp);on('#im',()=>$('#fi').click());
 }
 function ask(t,ok,f,dg){const d=$('#dlg');
  d.innerHTML=`<div class="card" style="width:min(340px,100%);margin:0"><p style="font-size:20px;font-weight:800;text-align:center;margin:6px 0 18px">${t}</p><div class="row"><button class="btn ghost" id="ca">Annuler</button><button class="btn ${dg?'dg':''}" id="co">${ok}</button></div></div>`;
@@ -142,23 +148,31 @@ function swipe(){
    else{const g=S.games.find(x=>x.id===id);go(g.done?'end':'game',id)}};
   w.querySelector('.rm').onclick=()=>ask('Supprimer cette partie ?','Supprimer',()=>{S.games=S.games.filter(x=>x.id!==id);render()},1);
  })}
-function create(name,pl){
- const d=new Date(),g={id:Date.now(),name:name||'Partie du '+fd(d),date:d.toISOString(),players:pl.map(n=>({name:n,hist:[]})),round:1,done:0,H:{}};
+async function exp(){const j=JSON.stringify({f7:2,games:S.games}),n='f7-score-'+new Date().toISOString().slice(0,10)+'.json';
+ try{const f=new File([j],n,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'F7 Score'});return}}catch(e){if(e&&e.name==='AbortError')return}
+ try{const u=URL.createObjectURL(new Blob([j],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();toast('📤 Fichier exporté');return}catch(e){}
+ try{await navigator.clipboard.writeText(j);toast('📋 Sauvegarde copiée')}catch(e){toast('Export impossible ici 😕')}}
+function imp(f){const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),L=Array.isArray(o)?o:o.games;if(!Array.isArray(L))throw 0;let n=0;
+  L.forEach(g=>{if(g&&g.players&&!S.games.some(x=>x.id===g.id)){S.games.push(g);n++}});toast(n?'📥 '+n+' partie'+(n>1?'s':'')+' importée'+(n>1?'s':''):'Rien de nouveau à importer');render()}catch(e){toast('Fichier invalide 😕')}};r.readAsText(f)}
+function create(name,pl,v,br){
+ const d=new Date(),g={id:Date.now(),name:name||'Partie du '+fd(d),date:d.toISOString(),players:pl.map(n=>({name:n,hist:[]})),round:1,done:0,v:v?1:0,br:v&&br?1:0,H:{}};
  S.games.push(g);go('game',g.id);
 }
 function newg(a){
  const known=[...new Set(S.games.flatMap(g=>g.players.map(p=>p.name)))].filter(n=>!N.pl.some(x=>x.toLowerCase()===n.toLowerCase()));
  a.innerHTML=`<div class="hd"><button class="back" id="bk">‹ Parties</button></div><h1>Nouvelle partie</h1>
  <div class="card"><input id="gn" placeholder="Nom de la partie (ex : Team Toudic)" maxlength="30" value="${esc(N.name)}"></div>
+ <div class="card row" style="justify-content:space-between;gap:12px"><div><b style="font-size:18px">😈 Mode Vengeance</b><div class="mut" style="font-size:13px;margin-top:2px">Cartes 0 à 13, The Zero, Lucky 13, malus −2 à −10 et ÷2</div></div><label class="tg"><input type="checkbox" id="vg" ${N.v?'checked':''}><span></span></label></div>
+ <div class="card row" id="brw" style="justify-content:space-between;gap:12px;display:${N.v?'flex':'none'}"><div><b style="font-size:18px">💀 Mode Brutal</b><div class="mut" style="font-size:13px;margin-top:2px">Scores négatifs possibles, malus sur les éliminés, Flip 7 : +15 ou −15 à un rival</div></div><label class="tg"><input type="checkbox" id="bg" ${N.br?'checked':''}><span></span></label></div>
  <div class="card"><div class="row"><input id="ni" placeholder="Ajouter un joueur" maxlength="16"><button class="ib ok" id="add">＋</button></div>
  <div>${N.pl.map((n,i)=>`<span class="chip">${AV[i%AV.length]} ${esc(n)}<button data-i="${i}">✕</button></span>`).join('')}</div>
  ${known.length?'<div class="mut" style="margin-top:14px">Déjà joué avec :</div>'+known.map(n=>`<span class="chip s" data-k="${esc(n)}">＋ ${esc(n)}</span>`).join(''):''}</div>
  <div class="bar"><div class="in"><button class="btn" id="go">🚀 C’est parti !</button></div></div>`;
  const add=n=>{n=n.trim();if(!n||N.pl.some(x=>x.toLowerCase()===n.toLowerCase()))return;N.name=$('#gn').value;N.pl.push(n);newg(a);$('#ni').focus()};
- on('#bk',()=>go('tabs'));on('#add',()=>add($('#ni').value));$('#ni').onkeydown=e=>{if(e.key==='Enter')add($('#ni').value)};
+ on('#bk',()=>go('tabs'));on('#add',()=>add($('#ni').value));$('#vg').onchange=e=>{N.v=e.target.checked?1:0;if(!N.v){N.br=0;$('#bg').checked=false}$('#brw').style.display=N.v?'flex':'none'};$('#bg').onchange=e=>{N.br=e.target.checked?1:0};$('#ni').onkeydown=e=>{if(e.key==='Enter')add($('#ni').value)};
  on('.chip button',e=>{N.name=$('#gn').value;N.pl.splice(+e.dataset.i,1);newg(a)});
  on('.chip.s',e=>add(e.dataset.k));
- on('#go',()=>{N.name=$('#gn').value.trim();if(N.pl.length<2)return toast('Il faut au moins 2 joueurs 😉');create(N.name,N.pl)});
+ on('#go',()=>{N.name=$('#gn').value.trim();if(N.pl.length<2)return toast('Il faut au moins 2 joueurs 😉');create(N.name,N.pl,N.v,N.v&&N.br)});
 }
 
 /* PARTIE EN COURS */
@@ -167,7 +181,7 @@ function game(a){
  if(!$('#list')){
   a.innerHTML=`<div class="hd"><button class="back" id="bk">‹ Parties</button><span class="pill" id="rd"></span><button class="ib" id="del">🗑</button></div><h2>${esc(g.name)}</h2><div id="list"></div><p class="mut c" style="margin-top:14px">Touche un joueur pour saisir ses cartes.<br>Inutile de saisir ceux qui font 0.</p><div class="bar"><div class="in" id="bb"></div></div>`;
   on('#bk',()=>go('tabs'));on('#del',delg)}
- $('#list').style.height=g.players.length*68+'px';$('#rd').textContent='Manche '+g.round;
+ $('#list').style.height=g.players.length*68+'px';$('#rd').textContent='Manche '+g.round+(g.br?' 💀':g.v?' 😈':'');
  $('#bb').innerHTML=`<button class="btn ghost sm" id="und">↩︎</button>${win?'<button class="btn ok" id="fin">🏆 Podium</button>':'<button class="btn ghost sm" id="fin">🏁</button>'}<button class="btn" id="val">✅ Valider</button>`;
  on('#und',undo);on('#fin',()=>{if(win)finish();else ask('Terminer la partie maintenant ?','Terminer',finish)});on('#val',validate);
  list();
@@ -177,7 +191,7 @@ function list(){
  g.players.forEach((p,i)=>{
   let e=$('#r'+i);const k=r[i],d=pr[i]-k,h=g.H[i],f=flips(p);
   if(!e){e=document.createElement('div');e.className='pr';e.id='r'+i;L.appendChild(e);e.style.transform=`translateY(${k*68}px)`}
-  e.innerHTML=`<div class="rk">${['🥇','🥈','🥉'][k]||k+1}</div>${avatar(i)}<div class="nm">${esc(p.name)}<small>${f?'⚡ '+f+' Flip 7':'&nbsp;'}</small></div><span class="pend ${h?'on':''}">${h?(h.b?'💥 0':'+'+calc(h)):'—'}</span><div class="sc">${tot(p)}${d?`<span class="dl ${d>0?'up':'dn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="dl">&nbsp;</span>'}</div>`;
+  e.innerHTML=`<div class="rk">${['🥇','🥈','🥉'][k]||k+1}</div>${avatar(i)}<div class="nm">${esc(p.name)}<small>${f?'⚡ '+f+' Flip 7':'&nbsp;'}</small></div><span class="pend ${h?'on':''}">${h?(h.b?'💥 '+calc(h,g.v,g.br):(x=>(x>0?'+':'')+x)(calc(h,g.v,g.br))):'—'}</span><div class="sc">${tot(p)}${d?`<span class="dl ${d>0?'up':'dn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="dl">&nbsp;</span>'}</div>`;
   e.onclick=()=>openSheet(i);
   requestAnimationFrame(()=>e.style.transform=`translateY(${k*68}px)`);
  });
@@ -186,25 +200,27 @@ function openSheet(i){SI=i;const g=cg();if(!g.H[i])g.H[i]={n:[],m:[],x:0,b:0};$(
 function closeSheet(){$('#sh').classList.remove('o');$('#ov').style.display='none';const g=cg(),h=g.H[SI];
  if(h&&!h.n.length&&!h.m.length&&!h.x&&!h.b)delete g.H[SI];list();save()}
 function sheet(){
- const g=cg(),p=g.players[SI],h=g.H[SI],f7=h.n.length>=7&&!h.b;
- $('#sh').innerHTML=`<div class="row" style="justify-content:space-between"><b style="font-size:22px">${esc(p.name)}</b><span class="pill">${h.n.length}/7 cartes</span></div>
- <div class="big" style="color:${h.b?'var(--dg)':'var(--ac)'}">${h.b?'💥 0':calc(h)}</div>
- ${f7?'<div class="f7">⚡ FLIP 7 ! +15 points bonus ⚡</div>':''}
- <div class="grid">${C.map((c,i)=>`<button class="cd ${h.n.includes(i)?'s':''}" style="background:${c}" data-n="${i}">${i}</button>`).join('')}</div>
- <div class="mods">${MODS.map(m=>`<button class="md ${h.m.includes(m)?'s':''}" data-m="${m}">+${m}</button>`).join('')}<button class="md ${h.x?'s':''}" data-x="1">×2</button></div>
+ const g=cg(),p=g.players[SI],h=g.H[SI],f7=cnt(h)>=7&&!h.b;
+ $('#sh').innerHTML=`<div class="row" style="justify-content:space-between"><b style="font-size:22px">${esc(p.name)}</b><span class="pill">${cnt(h)}/7 cartes</span></div>
+ <div class="big" style="color:${h.b?'var(--dg)':'var(--ac)'}">${h.b?'💥 '+calc(h,g.v,g.br):calc(h,g.v,g.br)}</div>
+ ${f7?'<div class="f7">⚡ FLIP 7 ! '+(g.br&&h.a>=0?'−15 à '+esc(g.players[h.a].name):'+15 points bonus')+' ⚡</div>':''}${f7&&g.br?`<div class="atk"><button class="ak ${h.a>=0?'':'s'}" data-a="-1">+15 pour moi</button>${g.players.map((q,j)=>j===SI?'':`<button class="ak ${h.a===j?'s':''}" data-a="${j}">−15 ${esc(q.name)}</button>`).join('')}</div>`:''}
+ <div class="grid">${C.slice(0,g.v?14:13).map((c,i)=>`<button class="cd ${h.n.includes(i)?'s':''}" style="background:${c};color:${[3,10,11,12].includes(i)?'#fff':'#2b2140'}" data-n="${i}">${i}</button>`).join('')}</div>
+ <div class="mods">${MODS.map(m=>`<button class="md ${h.m.includes(m)?'s':''}" data-m="${m}">${g.v?'−':'+'}${m}</button>`).join('')}<button class="md ${h.x?'s':''}" data-x="1">${g.v?'÷2':'×2'}</button></div>${g.v&&h.n.includes(13)?`<button class="lk ${h.l?'s':''}" id="lk">🍀 Lucky 13 : j’ai un 2ᵉ 13</button>`:''}${g.v&&h.n.includes(0)&&!f7&&!h.b?'<div class="f7" style="background:var(--dg);animation:none">☠️ The Zero : score à 0 (sauf Flip 7)</div>':''}
  <button class="bust ${h.b?'s':''}" id="bu">💥 Doublon : éliminé (0 pt)</button>
  <div class="row"><button class="btn ghost" id="rz" style="flex:0 0 90px">🗑️</button><button class="btn" id="ok">👍 OK</button></div>`;
- on('[data-n]',b=>{const v=+b.dataset.n;h.b=0;h.n=h.n.includes(v)?h.n.filter(x=>x!==v):[...h.n,v];if(h.n.length===7){confetti(60);navigator.vibrate&&navigator.vibrate(60)}sheet()});
+ on('[data-n]',b=>{const v=+b.dataset.n;h.b=0;h.n=h.n.includes(v)?h.n.filter(x=>x!==v):[...h.n,v];if(!h.n.includes(13))h.l=0;if(cnt(h)===7){confetti(60);navigator.vibrate&&navigator.vibrate(60)}sheet()});
  on('[data-m]',b=>{const v=+b.dataset.m;h.m=h.m.includes(v)?h.m.filter(x=>x!==v):[...h.m,v];sheet()});
  on('[data-x]',()=>{h.x=h.x?0:1;sheet()});
  on('#bu',()=>{h.b=h.b?0:1;sheet()});
  on('#rz',()=>{g.H[SI]={n:[],m:[],x:0,b:0};sheet()});
- on('#ok',closeSheet);
+ on('#lk',()=>{h.l=h.l?0:1;sheet()});on('[data-a]',b=>{h.a=+b.dataset.a;sheet()});on('#ok',closeSheet);
 }
 function validate(){
  const g=cg();if(!Object.keys(g.H).length)return toast('Saisis au moins une main 🃏');
  const before=g.players.map(p=>tot(p));
- g.players.forEach((p,i)=>{const h=g.H[i];p.hist.push({s:calc(h),f:h&&!h.b&&h.n.length>=7?1:0})});
+ const sc=g.players.map((p,i)=>calc(g.H[i],g.v,g.br));
+ g.players.forEach((p,i)=>{const h=g.H[i];if(g.br&&h&&!h.b&&cnt(h)>=7&&h.a>=0&&sc[h.a]!==undefined)sc[h.a]-=15});
+ g.players.forEach((p,i)=>{const h=g.H[i];p.hist.push({s:sc[i],f:h&&!h.b&&cnt(h)>=7?1:0})});
  g.round++;g.H={};
  const hit=g.players.filter((p,i)=>before[i]<200&&tot(p)>=200);
  render();
@@ -225,7 +241,7 @@ function end(a){
  ${o.map((x,j)=>`<div class="card row" style="padding:12px 14px;margin-bottom:8px"><div class="rk">${['🥇','🥈','🥉'][j]||j+1}</div>${avatar(x.i)}<div class="nm">${esc(x.p.name)}<small>${flips(x.p)?'⚡ '+flips(x.p)+' Flip 7 · ':''}meilleure manche ${Math.max(0,...x.p.hist.map(h=>h.s))}</small></div><div class="sc">${x.t}</div></div>`).join('')}
  <div class="bar"><div class="in"><button class="btn ghost" id="st">📊 Stats</button><button class="btn" id="rp">🔄 Rejouer</button></div></div>`;
  on('#bk',()=>go('tabs'));on('#del',delg);on('#st',()=>{S.tab='s';go('tabs')});
- on('#rp',()=>create(g.name,g.players.map(p=>p.name)));
+ on('#rp',()=>create(g.name,g.players.map(p=>p.name),g.v,g.br));
 }
 
 /* CLASSEMENTS */
@@ -252,5 +268,6 @@ function confetti(n){const w=cv.width,d=devicePixelRatio;
 function tick(){cx.clearRect(0,0,cv.width,cv.height);P=P.filter(p=>p.l>0&&p.y<cv.height+50);
  P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35*devicePixelRatio;p.vx*=.99;p.a+=p.va;p.l--;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.fillRect(-p.r,-p.r/2,p.r*2,p.r);cx.restore()});
  if(P.length)requestAnimationFrame(tick);else run=0}
+$('#fi').onchange=e=>{const f=e.target.files[0];if(f)imp(f);e.target.value=''};
 load();render();
 </script></body></html>
